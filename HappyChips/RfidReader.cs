@@ -9,6 +9,8 @@ namespace HappyChips
 
         private int _timeout = 2000;
 
+        private uint _roSpecId = 123;
+
         public RfidReader(string readerHostname, out ENUM_ConnectionAttemptStatusType status)
         {
 
@@ -45,7 +47,7 @@ namespace HappyChips
         {
             // Disable ROSpec
             MSG_DISABLE_ROSPEC msg = new MSG_DISABLE_ROSPEC();
-            msg.ROSpecID = 123;
+            msg.ROSpecID = _roSpecId;
             MSG_ERROR_MESSAGE msg_err;
             MSG_DISABLE_ROSPEC_RESPONSE rsp = _client.DISABLE_ROSPEC(msg, out msg_err, _timeout);
 
@@ -107,7 +109,7 @@ namespace HappyChips
             msg.ROSpec.CurrentState = ENUM_ROSpecState.Disabled;
             // The ROSpec ID can be set to any number
             // You must use the same ID when enabling this ROSpec
-            msg.ROSpec.ROSpecID = 123;
+            msg.ROSpec.ROSpecID = _roSpecId;
 
             // ROBoundarySpec
             // Specifies the start and stop triggers for the ROSpec
@@ -153,7 +155,7 @@ namespace HappyChips
         {
             MSG_ERROR_MESSAGE msg_err;
             MSG_ENABLE_ROSPEC msg = new MSG_ENABLE_ROSPEC();
-            msg.ROSpecID = 123;
+            msg.ROSpecID = _roSpecId;
             MSG_ENABLE_ROSPEC_RESPONSE rsp = _client.ENABLE_ROSPEC(msg, out msg_err, _timeout);
 
             return (rsp, msg_err);
