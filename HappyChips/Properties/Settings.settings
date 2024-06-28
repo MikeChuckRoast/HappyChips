@@ -1,0 +1,18 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="HappyChips.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="ReaderAddress" Type="System.String" Scope="User">
+      <Value Profile="(Default)">FX960077E70B</Value>
+    </Setting>
+    <Setting Name="LynxAddress" Type="System.String" Scope="User">
+      <Value Profile="(Default)">127.0.0.1</Value>
+    </Setting>
+    <Setting Name="LynxPort" Type="System.String" Scope="User">
+      <Value Profile="(Default)">5086</Value>
+    </Setting>
+    <Setting Name="ChipMask" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+  </Settings>
+</SettingsFile>

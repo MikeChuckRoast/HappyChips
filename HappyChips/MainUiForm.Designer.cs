@@ -198,6 +198,8 @@ namespace HappyChips
             contextMenuStrip1.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
+            this.FormClosing += new FormClosingEventHandler(MainUiForm_FormClosing);
+
         }
 
         #endregion

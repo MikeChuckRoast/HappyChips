@@ -31,6 +31,12 @@ namespace HappyChips
         {
             InitializeComponent();
 
+            // Load settings
+            readerAddressTextBox.Text = Properties.Settings.Default.ReaderAddress;
+            lynxAddressTextBox.Text = Properties.Settings.Default.LynxAddress;
+            lynxPortTextBox.Text = Properties.Settings.Default.LynxPort;
+            maskValueTextBox.Text = Properties.Settings.Default.ChipMask;
+
             chipDataGrid.DataSource = CurrentChipReadsList;
             // Set the size of a specific column after the DataSource is set
             chipDataGrid.DataBindingComplete += (s, e) =>
@@ -51,6 +57,16 @@ namespace HappyChips
             refreshTimer.Interval = 2000; // 2000 milliseconds = 2 seconds
             refreshTimer.Tick += RefreshTimer_Tick; // Event handler for the Tick event
 
+        }
+
+        private void MainUiForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // Save settings
+            Properties.Settings.Default.ReaderAddress = readerAddressTextBox.Text;
+            Properties.Settings.Default.LynxAddress = lynxAddressTextBox.Text;
+            Properties.Settings.Default.LynxPort = lynxPortTextBox.Text;
+            Properties.Settings.Default.ChipMask = maskValueTextBox.Text;
+            Properties.Settings.Default.Save();
         }
 
         private void startButton_Click(object sender, EventArgs e)
