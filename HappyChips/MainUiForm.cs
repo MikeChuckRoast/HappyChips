@@ -75,6 +75,7 @@ namespace HappyChips
             }
 
             // Start reading
+            ClearChips();
             delegateRoAccessReport reportDelegate = new delegateRoAccessReport(OnChipRead);
             var (success, message) = _reader.ConfigureReader(reportDelegate);
             if (!success)
@@ -136,6 +137,11 @@ namespace HappyChips
             stopButton.BackColor = _reading ? System.Drawing.Color.Red : System.Drawing.Color.Gray;
         }
 
+        private void ClearChips()
+        {
+            _chipReads = new ConcurrentDictionary<string, ChipReads>();
+        }
+
         private void OnChipRead(MSG_RO_ACCESS_REPORT msg)
         {
             if (msg.TagReportData == null)
@@ -144,6 +150,9 @@ namespace HappyChips
             }
             foreach (var tagReportData in msg.TagReportData)
             {
+                if (!chipMatchesMask(tagReportData))
+                    continue;
+
                 // Log chip read for display in UI
                 addChipRead(tagReportData);
 
@@ -151,6 +160,18 @@ namespace HappyChips
                 _lynxInterface?.SendMessageViaUdp(tagReportData);
             }
         }
+
+        private bool chipMatchesMask(PARAM_TagReportData tagReportData)
+        {
+            // Check if the chip matches the mask
+            if (maskValueTextBox.Text.Length == 0)
+            {
+                return true;
+            }
+            string mask = maskValueTextBox.Text;
+            string epc = RfidReader.GetEpcHexString(tagReportData.EPCParameter);
+            return epc.Contains(mask);
+        }   
 
         private void addChipRead(PARAM_TagReportData tagReportData)
         {
