@@ -30,6 +30,7 @@ namespace HappyChips
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             chipDataGrid = new DataGridView();
             startButton = new Button();
             stopButton = new Button();
@@ -41,19 +42,25 @@ namespace HappyChips
             label2 = new Label();
             label3 = new Label();
             messagesTextBox = new TextBox();
+            portLabel = new Label();
+            contextMenuStrip1 = new ContextMenuStrip(components);
+            copyChipIPToolStripMenuItem = new ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)chipDataGrid).BeginInit();
+            contextMenuStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // chipDataGrid
             // 
             chipDataGrid.AllowUserToAddRows = false;
             chipDataGrid.AllowUserToDeleteRows = false;
+            chipDataGrid.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             chipDataGrid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             chipDataGrid.Location = new Point(12, 252);
             chipDataGrid.Name = "chipDataGrid";
             chipDataGrid.ReadOnly = true;
             chipDataGrid.Size = new Size(417, 397);
             chipDataGrid.TabIndex = 0;
+            chipDataGrid.MouseClick += ChipDataGrid_MouseClick;
             // 
             // startButton
             // 
@@ -110,13 +117,15 @@ namespace HappyChips
             lynxAddressTextBox.Name = "lynxAddressTextBox";
             lynxAddressTextBox.Size = new Size(100, 23);
             lynxAddressTextBox.TabIndex = 7;
+            lynxAddressTextBox.Text = "127.0.0.1";
             // 
             // lynxPortTextBox
             // 
-            lynxPortTextBox.Location = new Point(286, 47);
+            lynxPortTextBox.Location = new Point(336, 47);
             lynxPortTextBox.Name = "lynxPortTextBox";
-            lynxPortTextBox.Size = new Size(100, 23);
+            lynxPortTextBox.Size = new Size(50, 23);
             lynxPortTextBox.TabIndex = 8;
+            lynxPortTextBox.Text = "5086";
             // 
             // label2
             // 
@@ -144,11 +153,34 @@ namespace HappyChips
             messagesTextBox.Size = new Size(320, 59);
             messagesTextBox.TabIndex = 12;
             // 
+            // portLabel
+            // 
+            portLabel.AutoSize = true;
+            portLabel.Location = new Point(301, 51);
+            portLabel.Name = "portLabel";
+            portLabel.Size = new Size(29, 15);
+            portLabel.TabIndex = 13;
+            portLabel.Text = "Port";
+            // 
+            // contextMenuStrip1
+            // 
+            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { copyChipIPToolStripMenuItem });
+            contextMenuStrip1.Name = "contextMenuStrip1";
+            contextMenuStrip1.Size = new Size(181, 48);
+            // 
+            // copyChipIPToolStripMenuItem
+            // 
+            copyChipIPToolStripMenuItem.Name = "copyChipIPToolStripMenuItem";
+            copyChipIPToolStripMenuItem.Size = new Size(180, 22);
+            copyChipIPToolStripMenuItem.Text = "Copy Chip ID";
+            copyChipIPToolStripMenuItem.Click += copyChipIPToolStripMenuItem_Click;
+            // 
             // MainUiForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(441, 661);
+            Controls.Add(portLabel);
             Controls.Add(messagesTextBox);
             Controls.Add(label3);
             Controls.Add(label2);
@@ -163,6 +195,7 @@ namespace HappyChips
             Name = "MainUiForm";
             Text = "Happy Chips";
             ((System.ComponentModel.ISupportInitialize)chipDataGrid).EndInit();
+            contextMenuStrip1.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -180,5 +213,8 @@ namespace HappyChips
         private Label label2;
         private Label label3;
         private TextBox messagesTextBox;
+        private Label portLabel;
+        private ContextMenuStrip contextMenuStrip1;
+        private ToolStripMenuItem copyChipIPToolStripMenuItem;
     }
 }

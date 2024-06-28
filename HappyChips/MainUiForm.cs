@@ -11,6 +11,7 @@ namespace HappyChips
     public partial class MainUiForm : Form
     {
 
+        private LynxInterface? _lynxInterface;
         private RfidReader? _reader;
         private bool _reading = false;
         private System.Windows.Forms.Timer refreshTimer;
@@ -24,6 +25,7 @@ namespace HappyChips
                 return new BindingList<ChipReads>(_chipReads.Values.ToList());
             }
         }
+        private int rightClickedRowIndex = -1;
 
         public MainUiForm()
         {
@@ -60,6 +62,9 @@ namespace HappyChips
             }
 
             addMessage("Starting...");
+
+            // Create Lynx interface
+            _lynxInterface = new LynxInterface(lynxAddressTextBox.Text, int.Parse(lynxPortTextBox.Text));
 
             // Connect to reader
             _reader = new RfidReader(readerAddressTextBox.Text, out ENUM_ConnectionAttemptStatusType status);
@@ -100,6 +105,10 @@ namespace HappyChips
             {
                 addMessage(message);
             }
+
+            // Close lynx
+            _lynxInterface?.Close();
+
             // Stop the timer
             refreshTimer.Stop();
 
@@ -135,20 +144,11 @@ namespace HappyChips
             }
             foreach (var tagReportData in msg.TagReportData)
             {
-                string epc = RfidReader.GetEpcHexString(tagReportData.EPCParameter);
-
-                string time = DateTime.Now.ToString("HH:mm:ss.fff"); // Current time in HH:MM:SS.XXX format
-                string message = $"{(char)0x01}S,{time},{epc}\r\n"; // Format message
-
+                // Log chip read for display in UI
                 addChipRead(tagReportData);
 
-                //addMessage(message);
-
-                // Convert the message to a byte array
-                //byte[] messageBytes = Encoding.ASCII.GetBytes(message);
-
-                // Send the message via UDP
-                //var bytes = udpClient.Send(messageBytes, messageBytes.Length, udpHost, udpPort);
+                // Send message to Lynx
+                _lynxInterface?.SendMessageViaUdp(tagReportData);
             }
         }
 
@@ -192,8 +192,37 @@ namespace HappyChips
 
         private void RefreshChipReadsDataGrid()
         {
-            chipDataGrid.DataSource = CurrentChipReadsList;
+            // sort chipReadsList by SecondsSinceLastRead
+            var chipReadsList = new BindingList<ChipReads>(CurrentChipReadsList.OrderBy(c => c.SecondsSinceLastRead).ToList());
+            chipDataGrid.DataSource = chipReadsList;
         }
 
+        private void copyChipIPToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (rightClickedRowIndex >= 0 && rightClickedRowIndex < chipDataGrid.Rows.Count)
+            {
+                // Assuming the ChipId is bound directly to a column in the DataGridView
+                string chipId = chipDataGrid.Rows[rightClickedRowIndex].Cells["ChipId"].Value.ToString();
+                if (!string.IsNullOrEmpty(chipId))
+                    Clipboard.SetText(chipId); // Copy ChipId to clipboard
+            }
+        }
+
+        private void ChipDataGrid_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                int rowIndex = chipDataGrid.HitTest(e.X, e.Y).RowIndex;
+                if (rowIndex != -1) // Ensure the click is on a row
+                {
+                    chipDataGrid.ClearSelection();
+                    chipDataGrid.Rows[rowIndex].Selected = true; // Select the row
+                    rightClickedRowIndex = rowIndex; // Store the right-clicked row index
+
+                    // Show the context menu at the mouse position
+                    contextMenuStrip1.Show(chipDataGrid, e.Location);
+                }
+            }
+        }
     }
 }
