@@ -45,6 +45,8 @@ namespace HappyChips
             portLabel = new Label();
             contextMenuStrip1 = new ContextMenuStrip(components);
             copyChipIPToolStripMenuItem = new ToolStripMenuItem();
+            transmitPowerCheckbox = new CheckBox();
+            transmitPowerTextBox = new TextBox();
             ((System.ComponentModel.ISupportInitialize)chipDataGrid).BeginInit();
             contextMenuStrip1.SuspendLayout();
             SuspendLayout();
@@ -55,10 +57,10 @@ namespace HappyChips
             chipDataGrid.AllowUserToDeleteRows = false;
             chipDataGrid.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             chipDataGrid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            chipDataGrid.Location = new Point(12, 252);
+            chipDataGrid.Location = new Point(12, 275);
             chipDataGrid.Name = "chipDataGrid";
             chipDataGrid.ReadOnly = true;
-            chipDataGrid.Size = new Size(417, 397);
+            chipDataGrid.Size = new Size(417, 409);
             chipDataGrid.TabIndex = 0;
             chipDataGrid.MouseClick += ChipDataGrid_MouseClick;
             // 
@@ -89,7 +91,7 @@ namespace HappyChips
             // 
             // maskValueTextBox
             // 
-            maskValueTextBox.Location = new Point(214, 214);
+            maskValueTextBox.Location = new Point(208, 237);
             maskValueTextBox.Name = "maskValueTextBox";
             maskValueTextBox.Size = new Size(122, 23);
             maskValueTextBox.TabIndex = 3;
@@ -97,7 +99,7 @@ namespace HappyChips
             // maskLabel
             // 
             maskLabel.AutoSize = true;
-            maskLabel.Location = new Point(105, 214);
+            maskLabel.Location = new Point(108, 240);
             maskLabel.Name = "maskLabel";
             maskLabel.Size = new Size(94, 15);
             maskLabel.TabIndex = 4;
@@ -147,10 +149,10 @@ namespace HappyChips
             // 
             // messagesTextBox
             // 
-            messagesTextBox.Location = new Point(66, 149);
+            messagesTextBox.Location = new Point(12, 172);
             messagesTextBox.Multiline = true;
             messagesTextBox.Name = "messagesTextBox";
-            messagesTextBox.Size = new Size(320, 59);
+            messagesTextBox.Size = new Size(417, 59);
             messagesTextBox.TabIndex = 12;
             // 
             // portLabel
@@ -166,20 +168,39 @@ namespace HappyChips
             // 
             contextMenuStrip1.Items.AddRange(new ToolStripItem[] { copyChipIPToolStripMenuItem });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(181, 48);
+            contextMenuStrip1.Size = new Size(145, 26);
             // 
             // copyChipIPToolStripMenuItem
             // 
             copyChipIPToolStripMenuItem.Name = "copyChipIPToolStripMenuItem";
-            copyChipIPToolStripMenuItem.Size = new Size(180, 22);
+            copyChipIPToolStripMenuItem.Size = new Size(144, 22);
             copyChipIPToolStripMenuItem.Text = "Copy Chip ID";
             copyChipIPToolStripMenuItem.Click += copyChipIPToolStripMenuItem_Click;
+            // 
+            // transmitPowerCheckbox
+            // 
+            transmitPowerCheckbox.AutoSize = true;
+            transmitPowerCheckbox.Location = new Point(113, 147);
+            transmitPowerCheckbox.Name = "transmitPowerCheckbox";
+            transmitPowerCheckbox.Size = new Size(140, 19);
+            transmitPowerCheckbox.TabIndex = 14;
+            transmitPowerCheckbox.Text = "Set Transmitter Power";
+            transmitPowerCheckbox.UseVisualStyleBackColor = true;
+            // 
+            // transmitPowerTextBox
+            // 
+            transmitPowerTextBox.Location = new Point(250, 145);
+            transmitPowerTextBox.Name = "transmitPowerTextBox";
+            transmitPowerTextBox.Size = new Size(70, 23);
+            transmitPowerTextBox.TabIndex = 15;
             // 
             // MainUiForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(441, 661);
+            ClientSize = new Size(441, 696);
+            Controls.Add(transmitPowerTextBox);
+            Controls.Add(transmitPowerCheckbox);
             Controls.Add(portLabel);
             Controls.Add(messagesTextBox);
             Controls.Add(label3);
@@ -194,12 +215,11 @@ namespace HappyChips
             Controls.Add(chipDataGrid);
             Name = "MainUiForm";
             Text = "Happy Chips";
+            FormClosing += MainUiForm_FormClosing;
             ((System.ComponentModel.ISupportInitialize)chipDataGrid).EndInit();
             contextMenuStrip1.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
-            this.FormClosing += new FormClosingEventHandler(MainUiForm_FormClosing);
-
         }
 
         #endregion
@@ -218,5 +238,7 @@ namespace HappyChips
         private Label portLabel;
         private ContextMenuStrip contextMenuStrip1;
         private ToolStripMenuItem copyChipIPToolStripMenuItem;
+        private CheckBox transmitPowerCheckbox;
+        private TextBox transmitPowerTextBox;
     }
 }

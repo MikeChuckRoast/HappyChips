@@ -70,5 +70,29 @@ namespace HappyChips.Properties {
                 this["ChipMask"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool SetTransmitPower {
+            get {
+                return ((bool)(this["SetTransmitPower"]));
+            }
+            set {
+                this["SetTransmitPower"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("200")]
+        public string TransmitPower {
+            get {
+                return ((string)(this["TransmitPower"]));
+            }
+            set {
+                this["TransmitPower"] = value;
+            }
+        }
     }
 }

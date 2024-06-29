@@ -1,4 +1,5 @@
 using HappyChips.Models;
+using HappyChips.Properties;
 using Org.LLRP.LTK.LLRPV1;
 using System.Collections.Concurrent;
 using System.ComponentModel;
@@ -36,6 +37,8 @@ namespace HappyChips
             lynxAddressTextBox.Text = Properties.Settings.Default.LynxAddress;
             lynxPortTextBox.Text = Properties.Settings.Default.LynxPort;
             maskValueTextBox.Text = Properties.Settings.Default.ChipMask;
+            transmitPowerCheckbox.Checked = Properties.Settings.Default.SetTransmitPower;
+            transmitPowerTextBox.Text = Properties.Settings.Default.TransmitPower;
 
             chipDataGrid.DataSource = CurrentChipReadsList;
             // Set the size of a specific column after the DataSource is set
@@ -66,6 +69,8 @@ namespace HappyChips
             Properties.Settings.Default.LynxAddress = lynxAddressTextBox.Text;
             Properties.Settings.Default.LynxPort = lynxPortTextBox.Text;
             Properties.Settings.Default.ChipMask = maskValueTextBox.Text;
+            Properties.Settings.Default.SetTransmitPower = transmitPowerCheckbox.Checked;
+            Properties.Settings.Default.TransmitPower = transmitPowerTextBox.Text;
             Properties.Settings.Default.Save();
         }
 
@@ -93,7 +98,7 @@ namespace HappyChips
             // Start reading
             ClearChips();
             delegateRoAccessReport reportDelegate = new delegateRoAccessReport(OnChipRead);
-            var (success, message) = _reader.ConfigureReader(reportDelegate);
+            var (success, message) = _reader.ConfigureReader(reportDelegate, transmitPowerCheckbox.Checked, ushort.Parse(transmitPowerTextBox.Text));
             if (!success)
             {
                 addMessage(message);
@@ -151,6 +156,8 @@ namespace HappyChips
             startButton.BackColor = _reading ? System.Drawing.Color.Gray : System.Drawing.Color.SpringGreen;
             stopButton.Enabled = _reading;
             stopButton.BackColor = _reading ? System.Drawing.Color.Red : System.Drawing.Color.Gray;
+            transmitPowerCheckbox.Enabled = !_reading;
+            transmitPowerTextBox.Enabled = !_reading;
         }
 
         private void ClearChips()
