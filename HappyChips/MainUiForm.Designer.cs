@@ -31,6 +31,7 @@ namespace HappyChips
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainUiForm));
             chipDataGrid = new DataGridView();
             startButton = new Button();
             stopButton = new Button();
@@ -213,6 +214,7 @@ namespace HappyChips
             Controls.Add(stopButton);
             Controls.Add(startButton);
             Controls.Add(chipDataGrid);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "MainUiForm";
             Text = "Happy Chips";
             FormClosing += MainUiForm_FormClosing;
