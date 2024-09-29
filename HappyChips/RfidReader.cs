@@ -1,9 +1,10 @@
-﻿using Org.LLRP.LTK.LLRPV1;
+﻿using HappyChips.Models;
+using Org.LLRP.LTK.LLRPV1;
 using DataType = Org.LLRP.LTK.LLRPV1.DataType;
 
 namespace HappyChips
 {
-    internal class RfidReader
+    internal class RfidReader : IGenericRfidReader
     {
         private LLRPClient _client;
 
@@ -11,11 +12,23 @@ namespace HappyChips
 
         private uint _roSpecId = 123;
 
-        public RfidReader(string readerHostname, out ENUM_ConnectionAttemptStatusType status)
+        private DelegateChipRead _delegateChipRead;
+
+        public RfidReader(string readerHostname, DelegateChipRead delegateChipRead, out string errorMessage)
         {
+            this._delegateChipRead = delegateChipRead;
 
             _client = new LLRPClient();
+            ENUM_ConnectionAttemptStatusType status;
             _client.Open(readerHostname, _timeout, out status);
+            if (status == ENUM_ConnectionAttemptStatusType.Success)
+            {
+                errorMessage = "";
+            }
+            else
+            {
+                errorMessage = RfidReader.ConnectionAttemptStatusEnumToString(status);
+            }
 
         }
 
@@ -39,14 +52,52 @@ namespace HappyChips
             }
         }
 
-        public (bool, string) ConfigureReader(delegateRoAccessReport reportDelegate, bool setTransmitPower = false, ushort transmitPower = 200)
+        private void OnChipRead(MSG_RO_ACCESS_REPORT msg)
+        {
+            if (msg.TagReportData == null)
+            {
+                return;
+            }
+            foreach (var tagReportData in msg.TagReportData)
+            {
+                // Chip EPC ID
+                var chipId = RfidReader.GetEpcHexString(tagReportData.EPCParameter);
+
+                // Last read time
+                DateTime lastRead;
+                if (tagReportData.LastSeenTimestampUTC != null)
+                {
+                    var lastReadUs = tagReportData.LastSeenTimestampUTC.Microseconds;
+                    lastRead = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(lastReadUs / 1000);
+                }
+                else
+                {
+                    lastRead = DateTime.UtcNow;
+                }
+
+                // Create a new ChipReadDetail object
+                ChipReadDetail chipReadDetail = new ChipReadDetail
+                {
+                    ChipId = chipId,
+                    LastRead = lastRead,
+                    TagSeenCount = 1,
+                    AntennaId = 0
+                };
+
+                // Call the delegate
+                _delegateChipRead(chipReadDetail);
+            }
+
+        }
+
+        public (bool, string) StartReader(bool setTransmitPower = false, int transmitPower = 30)
         {
             var (deleteSuccess, deleteMessage) = DeleteActiveROSpecs();
 
             // Set transmit power
             if (setTransmitPower)
             {
-                var (success, message) = SetTransmitPower(transmitPower);
+                var (success, message) = SetTransmitPower((ushort)(transmitPower / 30 * 200));
                 if (!success)
                 {
                     return (false, "Error setting transmit power: " + message);
@@ -54,6 +105,7 @@ namespace HappyChips
             }
 
             // Define report delegate
+            delegateRoAccessReport reportDelegate = new delegateRoAccessReport(OnChipRead);
             _client.OnRoAccessReportReceived += reportDelegate;
 
             // Add ROSpec
@@ -75,7 +127,7 @@ namespace HappyChips
             return (true, "Reader Configured");
         }
 
-        public (bool, string) StopReading()
+        public (bool, string) StopReader()
         {
             // Disable ROSpec
             MSG_DISABLE_ROSPEC msg = new MSG_DISABLE_ROSPEC();

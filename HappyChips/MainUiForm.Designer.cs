@@ -47,9 +47,10 @@ namespace HappyChips
             contextMenuStrip1 = new ContextMenuStrip(components);
             copyChipIPToolStripMenuItem = new ToolStripMenuItem();
             transmitPowerCheckbox = new CheckBox();
-            transmitPowerTextBox = new TextBox();
+            transmitPowerNumber = new NumericUpDown();
             ((System.ComponentModel.ISupportInitialize)chipDataGrid).BeginInit();
             contextMenuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)transmitPowerNumber).BeginInit();
             SuspendLayout();
             // 
             // chipDataGrid
@@ -188,19 +189,22 @@ namespace HappyChips
             transmitPowerCheckbox.Text = "Set Transmitter Power";
             transmitPowerCheckbox.UseVisualStyleBackColor = true;
             // 
-            // transmitPowerTextBox
+            // transmitPowerNumber
             // 
-            transmitPowerTextBox.Location = new Point(250, 145);
-            transmitPowerTextBox.Name = "transmitPowerTextBox";
-            transmitPowerTextBox.Size = new Size(70, 23);
-            transmitPowerTextBox.TabIndex = 15;
+            transmitPowerNumber.Location = new Point(255, 146);
+            transmitPowerNumber.Maximum = new decimal(new int[] { 30, 0, 0, 0 });
+            transmitPowerNumber.Minimum = new decimal(new int[] { 10, 0, 0, 0 });
+            transmitPowerNumber.Name = "transmitPowerNumber";
+            transmitPowerNumber.Size = new Size(39, 23);
+            transmitPowerNumber.TabIndex = 16;
+            transmitPowerNumber.Value = new decimal(new int[] { 30, 0, 0, 0 });
             // 
             // MainUiForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(441, 696);
-            Controls.Add(transmitPowerTextBox);
+            Controls.Add(transmitPowerNumber);
             Controls.Add(transmitPowerCheckbox);
             Controls.Add(portLabel);
             Controls.Add(messagesTextBox);
@@ -220,6 +224,7 @@ namespace HappyChips
             FormClosing += MainUiForm_FormClosing;
             ((System.ComponentModel.ISupportInitialize)chipDataGrid).EndInit();
             contextMenuStrip1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)transmitPowerNumber).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -241,6 +246,6 @@ namespace HappyChips
         private ContextMenuStrip contextMenuStrip1;
         private ToolStripMenuItem copyChipIPToolStripMenuItem;
         private CheckBox transmitPowerCheckbox;
-        private TextBox transmitPowerTextBox;
+        private NumericUpDown transmitPowerNumber;
     }
 }

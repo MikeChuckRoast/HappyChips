@@ -85,13 +85,25 @@ namespace HappyChips.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("200")]
+        [global::System.Configuration.DefaultSettingValueAttribute("30")]
         public string TransmitPower {
             get {
                 return ((string)(this["TransmitPower"]));
             }
             set {
                 this["TransmitPower"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LogFile {
+            get {
+                return ((string)(this["LogFile"]));
+            }
+            set {
+                this["LogFile"] = value;
             }
         }
     }

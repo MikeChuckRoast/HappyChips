@@ -1,6 +1,6 @@
 using HappyChips.Models;
 using HappyChips.Properties;
-using Org.LLRP.LTK.LLRPV1;
+
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Net.Sockets;
@@ -13,7 +13,7 @@ namespace HappyChips
     {
 
         private LynxInterface? _lynxInterface;
-        private RfidReader? _reader;
+        private IGenericRfidReader? _reader;
         private bool _reading = false;
         private System.Windows.Forms.Timer refreshTimer;
         private ConcurrentDictionary<string, ChipReads> _chipReads = new ConcurrentDictionary<string, ChipReads>();
@@ -38,7 +38,7 @@ namespace HappyChips
             lynxPortTextBox.Text = Properties.Settings.Default.LynxPort;
             maskValueTextBox.Text = Properties.Settings.Default.ChipMask;
             transmitPowerCheckbox.Checked = Properties.Settings.Default.SetTransmitPower;
-            transmitPowerTextBox.Text = Properties.Settings.Default.TransmitPower;
+            transmitPowerNumber.Text = Properties.Settings.Default.TransmitPower;
 
             chipDataGrid.DataSource = CurrentChipReadsList;
             // Set the size of a specific column after the DataSource is set
@@ -70,7 +70,7 @@ namespace HappyChips
             Properties.Settings.Default.LynxPort = lynxPortTextBox.Text;
             Properties.Settings.Default.ChipMask = maskValueTextBox.Text;
             Properties.Settings.Default.SetTransmitPower = transmitPowerCheckbox.Checked;
-            Properties.Settings.Default.TransmitPower = transmitPowerTextBox.Text;
+            Properties.Settings.Default.TransmitPower = transmitPowerNumber.Text;
             Properties.Settings.Default.Save();
         }
 
@@ -85,23 +85,29 @@ namespace HappyChips
             addMessage("Starting...");
 
             // Create Lynx interface
-            _lynxInterface = new LynxInterface(lynxAddressTextBox.Text, int.Parse(lynxPortTextBox.Text));
+            _lynxInterface = new LynxInterface(lynxAddressTextBox.Text, int.Parse(lynxPortTextBox.Text), Properties.Settings.Default.LogFile);
 
             // Connect to reader
-            _reader = new RfidReader(readerAddressTextBox.Text, out ENUM_ConnectionAttemptStatusType status);
-            if (status != ENUM_ConnectionAttemptStatusType.Success)
+            if (_reader == null)
             {
-                addMessage("Error connecting to reader: " + RfidReader.ConnectionAttemptStatusEnumToString(status));
-                return;
+                _reader = new ZebraReader(readerAddressTextBox.Text, new DelegateChipRead(OnChipRead), out string status);
+                if (!status.Equals(""))
+                {
+                    addMessage("Error connecting to reader: " + status);
+                    _lynxInterface?.Close();
+                    _lynxInterface = null;
+                    return;
+                }
             }
 
             // Start reading
             ClearChips();
-            delegateRoAccessReport reportDelegate = new delegateRoAccessReport(OnChipRead);
-            var (success, message) = _reader.ConfigureReader(reportDelegate, transmitPowerCheckbox.Checked, ushort.Parse(transmitPowerTextBox.Text));
+            var (success, message) = _reader.StartReader(transmitPowerCheckbox.Checked, ushort.Parse(transmitPowerNumber.Text));
             if (!success)
             {
                 addMessage(message);
+                _lynxInterface?.Close();
+                _lynxInterface = null;
                 return;
             }
 
@@ -122,7 +128,7 @@ namespace HappyChips
             }
             addMessage("Stopping...");
 
-            var (success, message) = _reader.StopReading();
+            var (success, message) = _reader.StopReader();
             if (!success)
             {
                 addMessage(message);
@@ -130,6 +136,7 @@ namespace HappyChips
 
             // Close lynx
             _lynxInterface?.Close();
+            _lynxInterface = null;
 
             // Stop the timer
             refreshTimer.Stop();
@@ -157,7 +164,7 @@ namespace HappyChips
             stopButton.Enabled = _reading;
             stopButton.BackColor = _reading ? System.Drawing.Color.Red : System.Drawing.Color.Gray;
             transmitPowerCheckbox.Enabled = !_reading;
-            transmitPowerTextBox.Enabled = !_reading;
+            transmitPowerNumber.Enabled = !_reading;
         }
 
         private void ClearChips()
@@ -165,26 +172,19 @@ namespace HappyChips
             _chipReads = new ConcurrentDictionary<string, ChipReads>();
         }
 
-        private void OnChipRead(MSG_RO_ACCESS_REPORT msg)
+        private void OnChipRead(ChipReadDetail chipReadDetail)
         {
-            if (msg.TagReportData == null)
-            {
+            if (!chipMatchesMask(chipReadDetail.ChipId))
                 return;
-            }
-            foreach (var tagReportData in msg.TagReportData)
-            {
-                if (!chipMatchesMask(tagReportData))
-                    continue;
 
-                // Log chip read for display in UI
-                addChipRead(tagReportData);
+            // Log chip read for display in UI
+            addChipRead(chipReadDetail);
 
-                // Send message to Lynx
-                _lynxInterface?.SendMessageViaUdp(tagReportData);
-            }
+            // Send message to Lynx
+            _lynxInterface?.SendMessageViaUdp(chipReadDetail);
         }
 
-        private bool chipMatchesMask(PARAM_TagReportData tagReportData)
+        private bool chipMatchesMask(string chipId)
         {
             // Check if the chip matches the mask
             if (maskValueTextBox.Text.Length == 0)
@@ -192,40 +192,34 @@ namespace HappyChips
                 return true;
             }
             string mask = maskValueTextBox.Text;
-            string epc = RfidReader.GetEpcHexString(tagReportData.EPCParameter);
-            return epc.Contains(mask);
+            return chipId.Contains(mask);
         }   
 
-        private void addChipRead(PARAM_TagReportData tagReportData)
+        private void addChipRead(ChipReadDetail chipReadDetail)       
         {
-            // Chip EPC ID
-            var chipId = RfidReader.GetEpcHexString(tagReportData.EPCParameter);
+            //// Chip EPC ID
+            //var chipId = RfidReader.GetEpcHexString(tagReportData.EPCParameter);
 
-            // Last read time
-            DateTime lastRead;
-            if (tagReportData.LastSeenTimestampUTC != null)
+            //// Last read time
+            //DateTime lastRead;
+            //if (tagReportData.LastSeenTimestampUTC != null)
+            //{
+            //    var lastReadUs = tagReportData.LastSeenTimestampUTC.Microseconds;
+            //    lastRead = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(lastReadUs / 1000);
+            //}
+            //else
+            //{
+            //    lastRead = DateTime.UtcNow;
+            //}
+
+            if (_chipReads.ContainsKey(chipReadDetail.ChipId))
             {
-                var lastReadUs = tagReportData.LastSeenTimestampUTC.Microseconds;
-                lastRead = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(lastReadUs / 1000);
+                _chipReads[chipReadDetail.ChipId].TotalReads = _chipReads[chipReadDetail.ChipId].TotalReads + chipReadDetail.TagSeenCount;
+                _chipReads[chipReadDetail.ChipId].LastRead = chipReadDetail.LastRead;
             }
             else
             {
-                lastRead = DateTime.UtcNow;
-            }
-
-            // Read count
-            long readCount = 1;
-            if (tagReportData.TagSeenCount != null)
-                readCount = tagReportData.TagSeenCount.TagCount;
-
-            if (_chipReads.ContainsKey(chipId))
-            {
-                _chipReads[chipId].TotalReads = _chipReads[chipId].TotalReads + readCount;
-                _chipReads[chipId].LastRead = lastRead;
-            }
-            else
-            {
-                _chipReads.TryAdd(chipId, new ChipReads { ChipId = chipId, LastRead = lastRead, TotalReads = readCount });
+                _chipReads.TryAdd(chipReadDetail.ChipId, new ChipReads { ChipId = chipReadDetail.ChipId, LastRead = chipReadDetail.LastRead, TotalReads = chipReadDetail.TagSeenCount });
             }
         }
 

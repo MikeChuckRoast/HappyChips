@@ -28,6 +28,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="Symbol.RFID3.Host">
+      <HintPath>..\..\..\..\..\..\Windows\Microsoft.NET\assembly\GAC_MSIL\Symbol.RFID3.Host\v4.0_1.2.0.0__68ec8db391f150ca\Symbol.RFID3.Host.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
