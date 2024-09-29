@@ -1,11 +1,6 @@
 using HappyChips.Models;
-using HappyChips.Properties;
-
 using System.Collections.Concurrent;
 using System.ComponentModel;
-using System.Net.Sockets;
-using System.Text;
-using System.Windows.Forms;
 
 namespace HappyChips
 {
@@ -59,6 +54,13 @@ namespace HappyChips
             refreshTimer = new System.Windows.Forms.Timer();
             refreshTimer.Interval = 2000; // 2000 milliseconds = 2 seconds
             refreshTimer.Tick += RefreshTimer_Tick; // Event handler for the Tick event
+
+            // Add version to title
+            Version? version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            if (version != null)
+            {
+                this.Text += " " + $"{version.Major}.{version.Minor}.{version.Build}";
+            }
 
         }
 
@@ -193,9 +195,9 @@ namespace HappyChips
             }
             string mask = maskValueTextBox.Text;
             return chipId.Contains(mask);
-        }   
+        }
 
-        private void addChipRead(ChipReadDetail chipReadDetail)       
+        private void addChipRead(ChipReadDetail chipReadDetail)
         {
             //// Chip EPC ID
             //var chipId = RfidReader.GetEpcHexString(tagReportData.EPCParameter);
